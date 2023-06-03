@@ -3,8 +3,11 @@
 #include <glad/glad.h> //biblioteca para uso de funções OpenGL.
 #include <string>
 #include <vector>
+#include <ctime>
 
 using namespace std;
+
+int start_timer= time(NULL);
 
 //Window pointer variable.
 SDL_Window* 	window_application = nullptr;
@@ -16,6 +19,53 @@ int screem_w = 640;
 int screem_h = 480;
 bool close_program = false;
 
+float obj_vertex[9] = {
+	-0.8f,-0.8f,0.0f,
+	 0.8f,-0.8f,0.0f,
+	 0.0f, 0.8f,0.0f
+	};
+GLuint VBO;
+
+//================================================== 4
+
+void CreateObject(){
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(obj_vertex), obj_vertex, GL_STATIC_DRAW);
+}
+
+//================================================== 3
+
+void CleanWindow(){
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+}
+
+void Draw(){
+	glEnable(GL_CULL_FACE);
+	
+	CreateObject();
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 1);
+	glDisableVertexAttribArray(0);
+}
+
+//================================================== 2
+
+void ProgramInputs(){
+	
+}
+
+void ProgramDraw(){
+	CleanWindow();
+	Draw();
+}
+
+//================================================== 1
+
+//Initialize program.
 void InitProgram(){
 	
 	//Initialize SDL video system.
@@ -29,8 +79,7 @@ void InitProgram(){
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	
 	//create window.
-	window_application = SDL_CreateWindow("window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,screem_w, screem_h,SDL_WINDOW_OPENGL);
-	
+	window_application = SDL_CreateWindow("SDL OpenGl OGLDEV",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,screem_w, screem_h,SDL_WINDOW_OPENGL);
 	if(window_application == nullptr){cout << "window creation error\n"; exit(1);}
 	
 	//OpenGL context.
@@ -44,21 +93,27 @@ void InitProgram(){
 //Window/Program loop.
 void MainLoop(){
 	while(close_program !=true){
-		close_program = true;
+		ProgramDraw();
+		SDL_GL_SwapWindow(window_application);
+		
+		if(time(NULL) - start_timer >= 5){close_program = true;};
+		
 	}
 }
 
 //Destroy program.
-void CleanUP(){
+void CleanProgram(){
 	SDL_DestroyWindow(window_application);
 	SDL_Quit();
 }
+
+//================================================== Main
 
 //Main function.
 int main(int argc, char * argv[]){
 	InitProgram();
 	MainLoop();
-	CleanUP();
+	CleanProgram();
 	
 	return 0;
 }
